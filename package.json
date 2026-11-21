@@ -1,0 +1,22 @@
+{
+  "name": "smart-canteen-management-system",
+  "version": "1.0.0",
+  "description": "Smart Canteen Management System - College Mini Project",
+  "scripts": {
+    "dev:backend": "cd backend && node server.js",
+    "dev:frontend": "cd frontend && npm run dev",
+    "test:workflow": "node test_workflow.js",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "keywords": [
+    "canteen",
+    "college-project",
+    "mern",
+    "smart-canteen",
+    "react",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "College Mini Project",
+  "license": "MIT"
+}
