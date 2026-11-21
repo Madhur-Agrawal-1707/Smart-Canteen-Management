@@ -1,7 +1,18 @@
 import axios from 'axios';
 
+// In production on Vercel, requests to /api are relative to the current origin
+const getBaseURL = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (import.meta.env.PROD) {
+    return '/api';
+  }
+  return 'http://localhost:5000/api';
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -24,8 +35,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Token expired or invalid
-      // Only clear if was logged in
       if (localStorage.getItem('canteen_token')) {
         localStorage.removeItem('canteen_token');
         localStorage.removeItem('canteen_user');

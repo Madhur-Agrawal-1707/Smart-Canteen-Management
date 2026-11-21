@@ -15,7 +15,26 @@ const app = express();
 // Middlewares
 app.use(cors());
 app.use(express.json());
-app.use(morgan('dev'));
+if (process.env.NODE_ENV !== 'production') {
+  app.use(morgan('dev'));
+}
+
+// Database auto-connect & seed check middleware for serverless/local
+let isSeeded = false;
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    if (!isSeeded) {
+      await seedDatabase();
+      isSeeded = true;
+    }
+    next();
+  } catch (err) {
+    console.error('Database middleware error:', err.message);
+    // Proceed so health check or error handling can still report
+    next();
+  }
+});
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -27,12 +46,13 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
     app: 'Smart Canteen Management System API',
+    environment: process.env.VERCEL ? 'vercel-serverless' : 'standalone-node',
     timestamp: new Date().toISOString(),
   });
 });
 
 // Root welcome
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send('Smart Canteen API is running smoothly.');
 });
 
@@ -47,19 +67,24 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Start server after database connection
-const startServer = async () => {
-  try {
-    await connectDB();
-    await seedDatabase();
+// Only start standalone HTTP server when executed directly (not in Vercel serverless)
+if (require.main === module && !process.env.VERCEL) {
+  const startServer = async () => {
+    try {
+      await connectDB();
+      await seedDatabase();
+      isSeeded = true;
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Smart Canteen Server running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error('❌ Failed to start server:', error);
-    process.exit(1);
-  }
-};
+      app.listen(PORT, () => {
+        console.log(`🚀 Smart Canteen Server running on http://localhost:${PORT}`);
+      });
+    } catch (error) {
+      console.error('❌ Failed to start server:', error);
+      process.exit(1);
+    }
+  };
 
-startServer();
+  startServer();
+}
+
+module.exports = app;
