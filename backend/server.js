@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const { connectDB } = require('./config/db');
@@ -19,7 +21,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
 
-// Database auto-connect & seed check middleware for serverless/local
+// Database auto-connect & seed check middleware
 let isSeeded = false;
 app.use(async (req, res, next) => {
   try {
@@ -31,7 +33,6 @@ app.use(async (req, res, next) => {
     next();
   } catch (err) {
     console.error('Database middleware error:', err.message);
-    // Proceed so health check or error handling can still report
     next();
   }
 });
@@ -46,15 +47,29 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
     app: 'Smart Canteen Management System API',
-    environment: process.env.VERCEL ? 'vercel-serverless' : 'standalone-node',
+    environment: process.env.RENDER ? 'render-service' : process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString(),
   });
 });
 
-// Root welcome
-app.get('/api', (req, res) => {
-  res.send('Smart Canteen API is running smoothly.');
-});
+// Serve frontend static build in production (Single Web Service on Render)
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+if (fs.existsSync(frontendDistPath)) {
+  console.log(`📦 Serving static frontend from: ${frontendDistPath}`);
+  app.use(express.static(frontendDistPath));
+
+  // Express 5 compatible catch-all for Single Page Application
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+      return res.sendFile(path.join(frontendDistPath, 'index.html'));
+    }
+    next();
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.send('Smart Canteen API is running. Build frontend with `npm run build` to serve UI.');
+  });
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -67,24 +82,22 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Only start standalone HTTP server when executed directly (not in Vercel serverless)
-if (require.main === module && !process.env.VERCEL) {
-  const startServer = async () => {
-    try {
-      await connectDB();
-      await seedDatabase();
-      isSeeded = true;
+// Start server
+const startServer = async () => {
+  try {
+    await connectDB();
+    await seedDatabase();
+    isSeeded = true;
 
-      app.listen(PORT, () => {
-        console.log(`🚀 Smart Canteen Server running on http://localhost:${PORT}`);
-      });
-    } catch (error) {
-      console.error('❌ Failed to start server:', error);
-      process.exit(1);
-    }
-  };
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Smart Canteen Server running on http://0.0.0.0:${PORT}`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+};
 
-  startServer();
-}
+startServer();
 
 module.exports = app;

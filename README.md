@@ -66,45 +66,45 @@ The system is pre-seeded with ready-to-present sample accounts and 14 delicious 
 
 ---
 
-## ☁️ Deploying to Vercel
+## 🚀 Deploying to Render (Unified 1-Service Architecture)
 
-The application is pre-configured with a serverless Express bridge ([api/index.js](file:///c:/Users/madhur/OneDrive/Desktop/projects/canteen/api/index.js)) and [vercel.json](file:///c:/Users/madhur/OneDrive/Desktop/projects/canteen/vercel.json) to deploy both frontend and backend seamlessly under a single URL!
+The system is configured to serve both the React frontend and Express backend from **one single Render Web Service** on Render's Free Tier! This means zero CORS issues and a single clean `.onrender.com` domain.
 
-### Option A: Deploy via Vercel CLI (Fastest)
+### Step-by-Step Render Deployment Guide
 
-1. Open your terminal in the project root:
+1. **Push your code to GitHub**:
    ```bash
-   npx vercel login
-   ```
-   *(Confirm the login in your browser)*
-
-2. Deploy the application:
-   ```bash
-   npx vercel
-   ```
-   *(Press **Enter** to accept all default settings: Link to project: Yes, Scope: your account, Project name: smart-canteen, Directory: `.`)*
-
-3. Deploy to production:
-   ```bash
-   npx vercel --prod
-   ```
-
----
-
-### Option B: Deploy via GitHub (Recommended for College Presentations)
-
-1. Create a new repository on your GitHub account (e.g. `smart-canteen`).
-2. Push your project code:
-   ```bash
-   git remote add origin https://github.com/<your-username>/smart-canteen.git
+   git add .
+   git commit -m "Deploy to Render"
+   git remote add origin https://github.com/<YOUR-GITHUB-USERNAME>/smart-canteen.git
    git branch -M main
    git push -u origin main
    ```
-3. Go to [vercel.com/new](https://vercel.com/new), select your GitHub repository, and click **Import**.
-4. In **Project Settings** ➔ **Environment Variables**, add:
-   - `MONGODB_URI`: Your MongoDB Atlas connection URI (`mongodb+srv://...`)
-   - `JWT_SECRET`: Any secret string (e.g. `super_secret_college_project_jwt_key_2026`)
-5. Click **Deploy**. Vercel will build both the React frontend and Express serverless API automatically!
+
+2. **Open Render Dashboard**:
+   - Go to [dashboard.render.com](https://dashboard.render.com).
+   - Click **New +** ➔ **Web Service**.
+   - Connect your GitHub repository (`smart-canteen`).
+
+3. **Configure Service Settings**:
+   - **Name**: `smart-canteen` (or any name you prefer)
+   - **Runtime**: `Node`
+   - **Region**: Choose the closest region (e.g. `Singapore` or `Oregon`)
+   - **Branch**: `main`
+   - **Build Command**: `npm run render-build`
+   - **Start Command**: `npm start`
+   - **Plan**: `Free`
+
+4. **Add Environment Variables**:
+   Click on the **Environment Variables** section and add:
+   - `NODE_ENV`: `production`
+   - `JWT_SECRET`: `super_secret_college_project_jwt_key_2026`
+   - `MONGODB_URI`: Your MongoDB Atlas URI (e.g. `mongodb+srv://<username>:<password>@cluster0.mongodb.net/smart-canteen?retryWrites=true&w=majority`)
+
+5. **Click "Deploy Web Service"**:
+   Render will automatically run `npm run render-build` (which installs all dependencies and builds the Vite frontend), then run `npm start` (starting the Express server, which serves both the API and the React frontend).
+
+Once deployed, your full-stack application will be live at `https://smart-canteen.onrender.com`!
 
 ---
 
@@ -121,26 +121,29 @@ The application is pre-configured with a serverless Express bridge ([api/index.j
   - **MongoDB** & **Mongoose ODM**
   - **JWT (JSON Web Tokens)** for stateless session authorization
   - **bcryptjs** for secure password hashing
-  - **Vercel Serverless Function** bridge & MongoDB connection caching
+  - Unified static asset server for production hosting
 
 ---
 
 ## ⚡ How to Run Locally
 
-### Step 1: Start Backend Server
+### Option 1: Run Full System Together (Production Mode)
 ```bash
-cd backend
-npm install
-node server.js
+npm run render-build
+npm start
 ```
-> Server runs on: `http://localhost:5000`
+> Open in your browser: `http://localhost:5000`  
+> Express serves both the React UI and the REST API simultaneously!
 
-### Step 2: Start Frontend Application
-```bash
-cd frontend
-npm install
-npm run dev
-```
+### Option 2: Run Development Mode (HMR Enabled)
+- **Terminal 1 (Backend)**:
+  ```bash
+  npm run dev:backend
+  ```
+- **Terminal 2 (Frontend)**:
+  ```bash
+  npm run dev:frontend
+  ```
 > Open in your browser: `http://127.0.0.1:5173`
 
 ---

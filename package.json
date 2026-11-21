@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "Smart Canteen Management System - College Mini Project",
   "scripts": {
+    "start": "node backend/server.js",
+    "build": "cd frontend && npm install && npm run build",
+    "render-build": "npm install && cd frontend && npm install && npm run build",
     "dev:backend": "cd backend && node server.js",
     "dev:frontend": "cd frontend && npm run dev",
     "dev": "npm run dev:backend",
-    "test:workflow": "node test_workflow.js",
-    "build": "cd frontend && npm install && npm run build",
-    "vercel-build": "cd frontend && npm install && npm run build"
+    "test:workflow": "node test_workflow.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -16,11 +17,9 @@
     "dotenv": "^18.0.10",
     "express": "^5.3.0",
     "jsonwebtoken": "^9.0.3",
+    "mongodb-memory-server": "^11.3.0",
     "mongoose": "^9.12.3",
     "morgan": "^1.12.1"
-  },
-  "devDependencies": {
-    "vercel": "^66.6.0"
   },
   "keywords": [
     "canteen",
@@ -29,7 +28,8 @@
     "smart-canteen",
     "react",
     "nodejs",
-    "mongodb"
+    "mongodb",
+    "render"
   ],
   "author": "College Mini Project",
   "license": "MIT"
