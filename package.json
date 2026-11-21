@@ -1,6 +1,7 @@
 {
   "name": "smart-canteen-management-system",
   "version": "1.0.0",
+  "main": "index.js",
   "description": "Smart Canteen Management System - College Mini Project",
   "scripts": {
     "start": "node backend/server.js",
